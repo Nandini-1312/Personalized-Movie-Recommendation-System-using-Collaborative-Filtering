@@ -16,4 +16,6 @@ Item-Based Recommender System: Development of an item-based collaborative filter
 
 Evaluation and Comparison: Comparative analysis of both recommender systems to assess their effectiveness in providing relevant and diverse movie recommendations.
 
-# Requirements: "recommenderlab" R package needs to be installed
+# Requirements: 
+
+"recommenderlab" R package needs to be installed.
