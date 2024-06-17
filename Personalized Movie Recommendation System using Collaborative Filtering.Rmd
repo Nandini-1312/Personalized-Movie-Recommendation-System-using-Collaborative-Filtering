@@ -1,0 +1,150 @@
+---
+title: "Personalized Movie Recommendation System using Collaborative Filtering"
+output:
+  word_document: default
+  html_document: default
+date: "2024-06-17"
+Author: Nandini Ethirajulu
+---
+
+```{r}
+##This R script demonstrates the implementation of movie recommendation systems using the MovieLens dataset, facilitated by the recommenderlab package. The dataset comprises approximately 100,000 ratings from 943 users on 1664 movies, collected over seven months via the MovieLens website
+
+#install.packages("recommenderlab")
+library("recommenderlab")
+data(MovieLense) 
+
+
+########### Exploratory Data Analysis and Preprocessing ###########
+
+
+
+#?MovieLense 
+
+Moviedata =MovieLense[]
+
+
+dim(getRatingMatrix(Moviedata)) ## 943 users 1664 movies are present in this dataset
+
+##analysing the matrix with limited dataset
+getRatingMatrix(Moviedata)[1:10, 1:10]
+
+
+
+
+########### Normalizing the data ###########
+
+
+Moviedata_Normalize <- normalize(Moviedata)
+Moviedata_Normalize
+
+image(Moviedata_Normalize[1:100,1:100], main = "Normalized ratings")
+
+
+image(Moviedata[1:100, 1:100], main = "Raw Ratings")
+
+getRatingMatrix(Moviedata_Normalize)[1:10, 1:10]
+
+########### Dataset Visualization ###########
+
+hist(getRatings(Moviedata_Normalize), breaks = 100, main = "Histogram of normalized ratings")
+
+hist(rowCounts(Moviedata_Normalize), breaks = 100, main = "ratings given by users")
+
+hist(colCounts(Moviedata_Normalize), breaks = 100, main = "count of ratings per movie")
+
+```
+
+```{r}
+#a) Developing a user-based recommender system that outputs a user’s top ten recommendations. 
+
+
+
+
+
+dim(Moviedata)#943 1664
+
+Moviedatasample <- sample(Moviedata, 600)
+dim(Moviedatasample) #600 1664
+Moviedata_evaluationScheme<- evaluationScheme(Moviedatasample,method = "split", given = 15, train=0.5, goodRating=4)
+Moviedata_evaluationScheme
+
+
+##Developing a user-based recommender system  
+Moviedata_userbased_model<- Recommender(getData(Moviedata_evaluationScheme,"train"), "UBCF")
+Moviedata_userbased_model
+
+predictions_userbased <- predict(Moviedata_userbased_model, Moviedata[603:607], n = 10)
+
+
+########### Illustrating top 10 recommendations for 5 users on five users. ###########
+
+print("top 10 recommendations for 5 users with a user-based recommender system are as follows: ")
+as(predictions_userbased, "list")
+```
+
+```{r}
+ # b) Developing a item-based recommender system that outputs same user’s top ten recommendations. 
+
+
+## item-based recommender system  
+Moviedata_itembased_model<- Recommender(getData(Moviedata_evaluationScheme,"train"), "IBCF")
+Moviedata_itembased_model
+
+predictions_itembased <- predict(Moviedata_itembased_model, Moviedata[603:607], n = 10)
+
+
+
+print("top 10 recommendations for 5 users with a item-based recommender system are as follows: ")
+as(predictions_itembased, "list")
+
+
+
+
+
+
+###general comparison and understanding between part A (user-based recommender system) and B (item-based recommender system)
+
+
+# Part  A provides movie recommendations based on similarities between the user's . Whereas, Part B provides movie recommendations based on the similarities observed between the movies of the selected 5 users.
+
+
+
+```
+
+```{r}
+#c)  
+
+######### Understanding and comparing the first users ratings given in the dataset to the  recommendations given to the user from user based recommender system model -
+
+
+print("First Users ratings: ")
+
+(as(MovieLense[603,], "list"))
+
+print("First Users recommendations given based on the user based recommender system model: ")
+
+as(predictions_userbased, "list")[1]
+
+
+
+##goals of a recommender system – relevance, novelty, serendipity, diversity:
+##Analysis each of them -
+
+##Relevance -- can be understood as the overlap of the user's preferences(based on their original ratings) and the recommendations obtained with the model. From overall analysis, we could see that there is no significant overlap of movies between these sets of movies -the genres do not align with users interests . This in turn means that these recommendations are not relevant to a great extent for this user.
+
+
+
+##Novelty -- this metric indicates whether the user is provided with new or more wider variety of movie genre recommendations apart from those the user has already watched and rated. As we analysed from relevance metric that there is no much overlap between the movie recommendations and user ratings, we can conclude by saying that user based recommender system has achieved its goal of providing high novelty to the user.
+
+
+##serendipity - Good serendipity indicates if the user has been recommended with an suprising or an unexpected movie which is newer to him to watch and rate, however it is more relevant and highly matching with the genre of his interests. With the given information, we can assess that user has a wider variety interest in watching different genres (total of 47 movies rated), and even the recommendations suggest wide variety of genres. So there are possibilities that serendipity is achieved for this user.
+
+
+##diversity -- illustrates if the user was recommended with movies of different genres, themes, or even from different time periods. From the original data - user's ratings we can understand that user has watched and rated movies from 1950 to 1998. However, movie recommendations were not provided from wide range of years. This indicates there is no much diversity in this recommendation for this user.
+
+
+
+
+
+```
